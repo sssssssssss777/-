@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Скейтинг система (правила 1-11)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: #e9ecef;
+            font-family: 'Segoe UI', Roboto, system-ui;
+            margin: 0;
+            padding: 24px;
+            color: #1e2a3a;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        h1 {
+            background: #2c7cb6;
+            color: white;
+            margin: 0;
+            padding: 1.2rem 1.8rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px 24px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            align-items: flex-end;
+        }
+        .ctrl-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .ctrl-group label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #495057;
+            text-transform: uppercase;
+        }
+        .ctrl-group input {
+            border: 1px solid #ced4da;
+            border-radius: 40px;
+            padding: 8px 12px;
+            width: 110px;
+            text-align: center;
+            font-size: 0.9rem;
+            background: white;
+        }
+        button {
+            background: #2c7cb6;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 8px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.05s linear;
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        .reset-btn {
+            background: #b45f2e;
+        }
+        .calc-btn {
+            background: #1f7a5c;
+        }
+        .dance-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 16px 24px;
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .dance-btn {
+            background: #e9ecef;
+            color: #2c7cb6;
+            font-weight: 600;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            border: none;
+        }
+        .dance-btn.active {
+            background: #2c7cb6;
+            color: white;
+        }
+        .dance-indicator {
+            margin-left: auto;
+            background: #e9ecef;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            color: #1f5e4a;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            padding: 0 24px 24px 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th {
+            background: #e9ecef;
+            color: #1e2a3a;
+            padding: 10px 6px;
+            font-weight: 600;
+            border: 1px solid #dee2e6;
+        }
+        td {
+            border: 1px solid #dee2e6;
+            padding: 6px 4px;
+            text-align: center;
+        }
+        .score-input {
+            width: 60px;
+            padding: 6px 0;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #ced4da;
+            border-radius: 28px;
+            background: white;
+        }
+        .score-input:focus {
+            outline: none;
+            border-color: #2c7cb6;
+            background: #f8f9fa;
+        }
+        .pair-name-input {
+            width: 90px;
+            padding: 5px;
+            text-align: center;
+            border-radius: 28px;
+            border: 1px solid #ced4da;
+        }
+        .results-area {
+            background: #f8f9fa;
+            border-radius: 20px;
+            margin: 8px 24px 28px 24px;
+            padding: 20px 24px;
+            border: 1px solid #dee2e6;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 8px 20px;
+            border-radius: 40px;
+            margin: 0 24px 16px 24px;
+            display: none;
+            font-weight: 500;
+        }
+        .final-list {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0 20px 0;
+        }
+        .final-list li {
+            background: white;
+            margin-bottom: 6px;
+            padding: 8px 18px;
+            border-radius: 40px;
+            border-left: 4px solid #2c7cb6;
+        }
+        .detail-table, .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.75rem;
+        }
+        .detail-table th, .detail-table td,
+        .summary-table th, .summary-table td {
+            border: 1px solid #ced4da;
+            padding: 5px 4px;
+            text-align: center;
+        }
+        .detail-table th, .summary-table th {
+            background: #e9ecef;
+            font-weight: 700;
+        }
+        h3, h4 {
+            color: #1a5543;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Скейтинг система (правила 1-11)</h1>
+
+    <div class="toolbar">
+        <div class="ctrl-group"><label>СУДЕЙ</label><input type="number" id="judgesCnt" min="1" max="30" value="5"></div>
+        <div class="ctrl-group"><label>ПАР</label><input type="number" id="couplesCnt" min="2" max="30" value="6"></div>
+        <div class="ctrl-group"><label>ТАНЦЕВ</label><input type="number" id="dancesCnt" min="1" max="12" value="4"></div>
+        <button id="applyBtn">Применить</button>
+        <button id="resetBtn" class="reset-btn">Сброс</button>
+        <button id="calcBtn" class="calc-btn">Рассчитать</button>
+    </div>
+
+    <div id="danceNav" class="dance-nav"></div>
+
+    <div class="table-wrapper">
+        <table id="mainTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <div id="errorMsg" class="error"></div>
+    <div id="resultsArea" class="results-area"></div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // Глобальные переменные
+    // --------------------------------------------------------------
+    let judges = 5, couples = 6, dances = 4, currentDance = 0;
+    let pairNames = [];
+    let scores = []; // [dance][pair][judge]
+
+    // DOM элементы
+    const judgesInp = document.getElementById('judgesCnt');
+    const couplesInp = document.getElementById('couplesCnt');
+    const dancesInp = document.getElementById('dancesCnt');
+    const applyBtn = document.getElementById('applyBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const calcBtn = document.getElementById('calcBtn');
+    const danceNavDiv = document.getElementById('danceNav');
+    const tableHead = document.getElementById('tableHead');
+    const tableBody = document.getElementById('tableBody');
+    const errorDiv = document.getElementById('errorMsg');
+    const resultsArea = document.getElementById('resultsArea');
+
+    function showError(msg) {
+        errorDiv.textContent = msg;
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 2800);
+    }
+
+    function initNames() {
+        pairNames = Array.from({ length: couples }, (_, i) => String(i + 1));
+    }
+
+    function initScores() {
+        scores = Array(dances).fill().map(() => Array(couples).fill().map(() => Array(judges).fill(null)));
+    }
+
+    // --------------------------------------------------------------
+    // Отрисовка таблицы ввода для текущего танца
+    // --------------------------------------------------------------
+    function renderTable() {
+        tableHead.innerHTML = '';
+        tableBody.innerHTML = '';
+        if (!scores.length) return;
+
+        const header = document.createElement('tr');
+        const thName = document.createElement('th');
+        thName.textContent = 'Название пары';
+        header.appendChild(thName);
+        for (let j = 0; j < judges; j++) {
+            const th = document.createElement('th');
+            th.textContent = `Судья ${j+1}`;
+            header.appendChild(th);
+        }
+        tableHead.appendChild(header);
+
+        const cur = scores[currentDance];
+        for (let c = 0; c < couples; c++) {
+            const tr = document.createElement('tr');
+            const tdName = document.createElement('td');
+            const nameInp = document.createElement('input');
+            nameInp.type = 'text';
+            nameInp.value = pairNames[c];
+            nameInp.className = 'pair-name-input';
+            nameInp.dataset.couple = c;
+            nameInp.addEventListener('change', (e) => {
+                const val = e.target.value.trim();
+                pairNames[c] = val === '' ? String(c+1) : val;
+            });
+            tdName.appendChild(nameInp);
+            tr.appendChild(tdName);
+
+            for (let j = 0; j < judges; j++) {
+                const td = document.createElement('td');
+                const inp = document.createElement('input');
+                inp.type = 'text';
+                inp.inputMode = 'numeric';
+                inp.className = 'score-input';
+                inp.dataset.couple = c;
+                inp.dataset.judge = j;
+                inp.value = (cur[c][j] !== null) ? cur[c][j] : '';
+                inp.addEventListener('input', onScoreChange);
+                td.appendChild(inp);
+                tr.appendChild(td);
+            }
+            tableBody.appendChild(tr);
+        }
+    }
+
+    function isUnique(judge, pair, value) {
+        for (let p = 0; p < couples; p++) {
+            if (p !== pair && scores[currentDance][p][judge] === value) return false;
+        }
+        return true;
+    }
+
+    function onScoreChange(e) {
+        const inp = e.target;
+        const pair = parseInt(inp.dataset.couple);
+        const judge = parseInt(inp.dataset.judge);
+        let raw = inp.value.trim();
+        let num = null;
+        if (raw !== '') {
+            let v = parseInt(raw, 10);
+            if (isNaN(v) || v < 1 || v > couples) {
+                showError(`Место должно быть от 1 до ${couples}`);
+                inp.value = '';
+                scores[currentDance][pair][judge] = null;
+                return;
+            }
+            if (!isUnique(judge, pair, v)) {
+                showError(`Судья ${judge+1} уже поставил место ${v} другой паре`);
+                inp.value = '';
+                scores[currentDance][pair][judge] = null;
+                return;
+            }
+            num = v;
+        }
+        scores[currentDance][pair][judge] = num;
+        if (num !== null) {
+            // Переход: сначала следующая пара у того же судьи
+            let nextPair = pair + 1;
+            let nextJudge = judge;
+            if (nextPair >= couples) {
+                nextPair = 0;
+                nextJudge = judge + 1;
+                if (nextJudge >= judges) {
+                    // Текущий танец заполнен → следующий танец
+                    if (currentDance + 1 < dances) {
+                        currentDance++;
+                        renderDanceNav();
+                        renderTable();
+                        setTimeout(() => focusFirstEmpty(), 30);
+                    }
+                    return;
+                }
+            }
+            const next = document.querySelector(`.score-input[data-couple='${nextPair}'][data-judge='${nextJudge}']`);
+            if (next) { next.focus(); next.select(); }
+        }
+    }
+
+    function focusFirstEmpty() {
+        for (let c = 0; c < couples; c++) {
+            for (let j = 0; j < judges; j++) {
+                const inp = document.querySelector(`.score-input[data-couple='${c}'][data-judge='${j}']`);
+                if (inp && inp.value === '') { inp.focus(); return; }
+            }
+        }
+    }
+
+    function renderDanceNav() {
+        danceNavDiv.innerHTML = '';
+        for (let d = 0; d < dances; d++) {
+            const btn = document.createElement('button');
+            btn.textContent = `Танец ${d+1}`;
+            btn.classList.add('dance-btn');
+            if (d === currentDance) btn.classList.add('active');
+            btn.addEventListener('click', () => {
+                currentDance = d;
+                renderDanceNav();
+                renderTable();
+                setTimeout(() => focusFirstEmpty(), 30);
+            });
+            danceNavDiv.appendChild(btn);
+        }
+        const span = document.createElement('span');
+        span.className = 'dance-indicator';
+        span.textContent = `${currentDance+1} / ${dances}`;
+        danceNavDiv.appendChild(span);
+    }
+
+    function applyConfig() {
+        let jj = parseInt(judgesInp.value, 10);
+        let cc = parseInt(couplesInp.value, 10);
+        let dd = parseInt(dancesInp.value, 10);
+        if (isNaN(jj)) jj = 5;
+        if (isNaN(cc)) cc = 6;
+        if (isNaN(dd)) dd = 4;
+        judges = Math.min(30, Math.max(1, jj));
+        couples = Math.min(30, Math.max(2, cc));
+        dances = Math.min(12, Math.max(1, dd));
+        if (currentDance >= dances) currentDance = 0;
+        initNames();
+        initScores();
+        renderDanceNav();
+        renderTable();
+        resultsArea.innerHTML = '<div style="padding: 12px; text-align: center;">Введите оценки и нажмите «Рассчитать»</div>';
+    }
+
+    function resetAll() {
+        for (let d = 0; d < dances; d++) {
+            for (let c = 0; c < couples; c++) {
+                for (let j = 0; j < judges; j++) {
+                    scores[d][c][j] = null;
+                }
+            }
+        }
+        renderTable();
+        resultsArea.innerHTML = '<div style="padding: 12px; text-align: center;">Все оценки сброшены</div>';
+    }
+
+    // --------------------------------------------------------------
+    // РАСЧЁТ МЕСТ В ТАНЦЕ (правила 5-8)
+    // --------------------------------------------------------------
+    function computeDancePlaces(danceIdx) {
+        const nJ = judges, nC = couples;
+        // Матрица оценок (по умолчанию – максимальное место)
+        let marks = Array(nC).fill().map(() => Array(nJ).fill(nC));
+        for (let c = 0; c < nC; c++) {
+            for (let j = 0; j < nJ; j++) {
+                let m = scores[danceIdx][c][j];
+                if (m !== null && m >= 1 && m <= nC) marks[c][j] = m;
+            }
+        }
+
+        // Для каждой пары и каждого лимита L (1..nC) – количество оценок ≤ L и их сумма
+        let cnt = Array(nC).fill().map(() => Array(nC+1).fill(0));
+        let sumC = Array(nC).fill().map(() => Array(nC+1).fill(0));
+        for (let c = 0; c < nC; c++) {
+            for (let j = 0; j < nJ; j++) {
+                let m = marks[c][j];
+                for (let L = m; L <= nC; L++) {
+                    cnt[c][L]++;
+                    sumC[c][L] += m;
+                }
+            }
+        }
+
+        let needed = Math.floor(nJ / 2) + 1;
+        let result = new Array(nC).fill(null);
+        let remaining = [...Array(nC).keys()];
+        let nextRank = 1;
+
+        function resolveGroup(group, startRank, startL) {
+            if (group.length === 0) return 0;
+            if (group.length === 1) {
+                result[group[0]] = startRank;
+                return 1;
+            }
+            let diffL = null;
+            for (let L = startL; L <= nC; L++) {
+                let keys = new Set();
+                for (let idx of group) keys.add(`${cnt[idx][L]}|${sumC[idx][L]}`);
+                if (keys.size > 1) { diffL = L; break; }
+            }
+            if (diffL === null) {
+                let sz = group.length;
+                let avg = (startRank + (startRank + sz - 1)) / 2;
+                for (let idx of group) result[idx] = avg;
+                return sz;
+            }
+            let sub = new Map();
+            for (let idx of group) {
+                let key = `${cnt[idx][diffL]}|${sumC[idx][diffL]}`;
+                if (!sub.has(key)) sub.set(key, []);
+                sub.get(key).push(idx);
+            }
+            let groups = Array.from(sub.values());
+            groups.sort((a,b) => {
+                let ca = cnt[a[0]][diffL], cb = cnt[b[0]][diffL];
+                if (ca !== cb) return cb - ca;
+                let sa = sumC[a[0]][diffL], sb = sumC[b[0]][diffL];
+                return sa - sb;
+            });
+            let cur = startRank;
+            for (let grp of groups) {
+                let used = resolveGroup(grp, cur, diffL + 1);
+                cur += used;
+            }
+            return cur - startRank;
+        }
+
+        while (remaining.length) {
+            let minL = null;
+            for (let L = nextRank; L <= nC; L++) {
+                for (let idx of remaining) if (cnt[idx][L] >= needed) { minL = L; break; }
+                if (minL !== null) break;
+            }
+            if (minL === null) break;
+            let cand = remaining.filter(idx => cnt[idx][minL] >= needed);
+            let groupsMap = new Map();
+            for (let idx of cand) {
+                let key = `${cnt[idx][minL]}|${sumC[idx][minL]}`;
+                if (!groupsMap.has(key)) groupsMap.set(key, []);
+                groupsMap.get(key).push(idx);
+            }
+            let groups = Array.from(groupsMap.values());
+            groups.sort((a,b) => {
+                let ca = cnt[a[0]][minL], cb = cnt[b[0]][minL];
+                if (ca !== cb) return cb - ca;
+                let sa = sumC[a[0]][minL], sb = sumC[b[0]][minL];
+                return sa - sb;
+            });
+            let curPlace = nextRank;
+            for (let grp of groups) {
+                let used = resolveGroup(grp, curPlace, minL + 1);
+                curPlace += used;
+            }
+            let assignedNow = [];
+            for (let i = 0; i < nC; i++) if (result[i] !== null) assignedNow.push(i);
+            remaining = remaining.filter(r => !assignedNow.includes(r));
+            nextRank = curPlace;
+        }
+        for (let i = 0; i < nC; i++) if (result[i] === null) result[i] = nextRank++;
+        return result;
+    }
+
+    // Детальная таблица для одного танца (колонки 1, 1-2, ...)
+    function danceDetailTable(danceIdx, places) {
+        const nJ = judges, nC = couples;
+        let marks = Array(nC).fill().map(() => Array(nJ).fill(nC));
+        for (let c = 0; c < nC; c++) {
+            for (let j = 0; j < nJ; j++) {
+                let m = scores[danceIdx][c][j];
+                if (m !== null && m >= 1 && m <= nC) marks[c][j] = m;
+            }
+        }
+        let cnt = Array(nC).fill().map(() => Array(nC+1).fill(0));
+        let sumC = Array(nC).fill().map(() => Array(nC+1).fill(0));
+        for (let c = 0; c < nC; c++) {
+            for (let j = 0; j < nJ; j++) {
+                let m = marks[c][j];
+                for (let L = m; L <= nC; L++) {
+                    cnt[c][L]++;
+                    sumC[c][L] += m;
+                }
+            }
+        }
+        let html = `<h4>Танец ${danceIdx+1}</h4><table class="detail-table"><thead>`;
+        html += `<tr><th>Пара</th><th>Оценки</th>`;
+        for (let k = 1; k <= nC; k++) html += `<th>${k===1?'1':`1-${k}`}</th>`;
+        html += `<th>Место</th></tr></thead><tbody>`;
+        for (let c = 0; c < nC; c++) {
+            html += `<td>`;
+            html += `<td>${pairNames[c]}</td>`;
+            html += `<td>${marks[c].join(' ')}</td>`;
+            for (let k = 1; k <= nC; k++) {
+                let cval = cnt[c][k], sval = sumC[c][k];
+                if (cval === 0) html += `<td>-</td>`;
+                else if (k === 1) html += `<td>${cval}</td>`;
+                else html += `<td>${cval}(${sval})</td>`;
+            }
+            let pl = places[c];
+            html += `<td><strong>${Number.isInteger(pl) ? pl : pl.toFixed(1)}</strong></td>`;
+            html += `</tr>`;
+        }
+        html += `</tbody></table><div style="font-size:0.7rem;">Необходимое большинство: ${Math.floor(judges/2)+1} из ${judges}</div>`;
+        return html;
+    }
+
+    // --------------------------------------------------------------
+    // ИТОГОВЫЕ МЕСТА (правила 9-11) и сводная таблица
+    // --------------------------------------------------------------
+    function computeFinal() {
+        let dancePlaces = [];
+        let detailsHtml = '';
+        for (let d = 0; d < dances; d++) {
+            let places = computeDancePlaces(d);
+            dancePlaces.push(places);
+            detailsHtml += danceDetailTable(d, places);
+        }
+
+        let sumPlaces = new Array(couples).fill(0);
+        for (let c = 0; c < couples; c++) {
+            for (let d = 0; d < dances; d++) sumPlaces[c] += dancePlaces[d][c];
+        }
+
+        // Коэффициенты эффективности (для правила 10)
+        let eff = [];
+        for (let c = 0; c < couples; c++) {
+            let arr = [];
+            for (let lim = 1; lim <= couples; lim++) {
+                let cnt = 0, sumC = 0;
+                for (let d = 0; d < dances; d++) {
+                    let p = dancePlaces[d][c];
+                    if (p <= lim) { cnt++; sumC += p; }
+                }
+                arr.push({ count: cnt, sumComp: sumC });
+            }
+            eff.push(arr);
+        }
+
+        function comparePairs(a, b) {
+            if (sumPlaces[a] !== sumPlaces[b]) return sumPlaces[a] - sumPlaces[b];
+            for (let lim = 0; lim < couples; lim++) {
+                if (eff[a][lim].count !== eff[b][lim].count) return eff[b][lim].count - eff[a][lim].count;
+                if (eff[a][lim].sumComp !== eff[b][lim].sumComp) return eff[a][lim].sumComp - eff[b][lim].sumComp;
+            }
+            // Большой скейтинг (правило 11)
+            let votesA = [], votesB = [];
+            for (let d = 0; d < dances; d++) {
+                for (let j = 0; j < judges; j++) {
+                    let va = scores[d][a][j], vb = scores[d][b][j];
+                    if (va === null) va = couples;
+                    if (vb === null) vb = couples;
+                    votesA.push(va);
+                    votesB.push(vb);
+                }
+            }
+            let total = judges * dances;
+            let need = Math.floor(total / 2) + 1;
+            for (let thr = 1; thr <= couples; thr++) {
+                let ca = votesA.filter(v => v <= thr).length;
+                let cb = votesB.filter(v => v <= thr).length;
+                if (ca !== cb) return cb - ca;
+                if (ca >= need) {
+                    let sa = votesA.filter(v => v <= thr).reduce((s,x) => s + x, 0);
+                    let sb = votesB.filter(v => v <= thr).reduce((s,x) => s + x, 0);
+                    if (sa !== sb) return sa - sb;
+                }
+            }
+            return 0;
+        }
+
+        let indices = [...Array(couples).keys()];
+        indices.sort(comparePairs);
+
+        let finalPlace = new Array(couples);
+        let cur = 1, i = 0;
+        while (i < couples) {
+            let j = i;
+            while (j < couples && comparePairs(indices[i], indices[j]) === 0) j++;
+            let sz = j - i;
+            let avg = cur + (sz - 1) / 2;
+            for (let k = i; k < j; k++) finalPlace[indices[k]] = avg;
+            cur += sz;
+            i = j;
+        }
+
+        // Группировка итоговых мест
+        let groups = new Map();
+        for (let c = 0; c < couples; c++) {
+            let pl = finalPlace[c];
+            if (!groups.has(pl)) groups.set(pl, []);
+            groups.get(pl).push(pairNames[c]);
+        }
+        let finalHtml = '<h3>ИТОГОВЫЕ МЕСТА</h3><ul class="final-list">';
+        for (let [pl, names] of Array.from(groups.entries()).sort((a,b) => a[0] - b[0])) {
+            finalHtml += `<li><strong>${pl}-е место</strong> — ${names.join(', ')}</li>`;
+        }
+        finalHtml += '</ul>';
+
+        // Сводная таблица для нескольких танцев (сумма мест и коэффициенты)
+        if (dances > 1) {
+            let summaryHtml = '<h4>Сводка по танцам (сумма мест и коэффициенты эффективности)</h4><table class="summary-table"><thead>';
+            summaryHtml += `<tr><th>Пара</th>`;
+            for (let d = 0; d < dances; d++) summaryHtml += `<th>Т${d+1}</th>`;
+            summaryHtml += `<th>Сумма</th>`;
+            for (let lim = 1; lim <= couples; lim++) summaryHtml += `<th>1-${lim}</th>`;
+            summaryHtml += `<th>Итог</th>`;
+            summaryHtml += `</thead><tbody>`;
+            let sortedFinal = [...Array(couples).keys()].sort((a,b) => finalPlace[a] - finalPlace[b]);
+            for (let c of sortedFinal) {
+                summaryHtml += `<tr>`;
+                summaryHtml += `<td><strong>${pairNames[c]}</strong></td>`;
+                for (let d = 0; d < dances; d++) {
+                    let pl = dancePlaces[d][c];
+                    summaryHtml += `<td>${Number.isInteger(pl) ? pl : pl.toFixed(1)}</td>`;
+                }
+                summaryHtml += `<td>${sumPlaces[c].toFixed(1)}</td>`;
+                for (let lim = 1; lim <= couples; lim++) {
+                    let cnt = eff[c][lim-1].count;
+                    let sc = eff[c][lim-1].sumComp;
+                    if (cnt === 0) summaryHtml += `<td>-</td>`;
+                    else if (lim === 1) summaryHtml += `<td>${cnt}</td>`;
+                    else summaryHtml += `<td>${cnt}(${sc})</td>`;
+                }
+                let fp = finalPlace[c];
+                summaryHtml += `<td><strong>${Number.isInteger(fp) ? fp : fp.toFixed(1)}</strong></td>`;
+                summaryHtml += `</tr>`;
+            }
+            summaryHtml += '</tbody></table>';
+            finalHtml += summaryHtml;
+        }
+
+        finalHtml += detailsHtml;
+        return finalHtml;
+    }
+
+    function calculateAndShow() {
+        for (let d = 0; d < dances; d++) {
+            for (let c = 0; c < couples; c++) {
+                for (let j = 0; j < judges; j++) {
+                    if (scores[d][c][j] === null) {
+                        showError(`Заполните все оценки! Танец ${d+1}, пара ${c+1}, судья ${j+1}`);
+                        return;
+                    }
+                }
+            }
+        }
+        resultsArea.innerHTML = computeFinal();
+    }
+
+    applyBtn.addEventListener('click', applyConfig);
+    resetBtn.addEventListener('click', resetAll);
+    calcBtn.addEventListener('click', calculateAndShow);
+    applyConfig();
+</script>
+</body>
+</html>
